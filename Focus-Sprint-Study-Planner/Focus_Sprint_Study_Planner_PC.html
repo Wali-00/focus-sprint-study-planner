@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101827" />
+  <title>Focus Sprint — Study Planner (PC Edition)</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #121d2e;
+      --panel-2: #172438;
+      --panel-3: #1c2b41;
+      --text: #eef4fb;
+      --muted: #91a2b8;
+      --line: rgba(164, 184, 207, .16);
+      --teal: #36d6bd;
+      --teal-dim: rgba(54, 214, 189, .13);
+      --amber: #f3b95f;
+      --amber-dim: rgba(243, 185, 95, .13);
+      --red: #fb7777;
+      --red-dim: rgba(251, 119, 119, .12);
+      --blue: #83aaff;
+      --radius: 18px;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .2);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% -10%, rgba(54, 214, 189, .10), transparent 34rem),
+        radial-gradient(circle at 95% 10%, rgba(131, 170, 255, .09), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1200px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 56px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand-mark {
+      width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px;
+      color: #061b1a; font-weight: 900; font-size: 20px;
+      background: linear-gradient(135deg, var(--teal), #a0f1d9); box-shadow: 0 8px 24px rgba(54, 214, 189, .2);
+    }
+    .brand h1 { font-size: 17px; letter-spacing: .11em; margin: 0; font-weight: 850; }
+    .brand p { color: var(--muted); margin: 2px 0 0; font-size: 12px; letter-spacing: .04em; }
+    .top-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    .btn {
+      border: 1px solid var(--line); background: var(--panel-2); color: var(--text); border-radius: 11px;
+      padding: 9px 13px; font-size: 12px; font-weight: 750; transition: .18s ease;
+    }
+    .btn:hover:not(:disabled) { border-color: rgba(54, 214, 189, .55); transform: translateY(-1px); }
+    .btn:disabled { opacity: .42; cursor: not-allowed; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #06201d; }
+    .btn-primary:hover:not(:disabled) { background: #62e4cd; }
+    .btn-quiet { background: transparent; }
+    .btn-danger { color: #ffaaaa; border-color: rgba(251, 119, 119, .28); background: var(--red-dim); }
+    .hero {
+      padding: 25px 27px; border: 1px solid var(--line); border-radius: 23px; box-shadow: var(--shadow);
+      background: linear-gradient(110deg, rgba(25, 45, 62, .98), rgba(19, 30, 47, .96));
+      display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 18px;
+    }
+    .eyebrow { color: var(--teal); text-transform: uppercase; font-size: 10px; font-weight: 850; letter-spacing: .17em; }
+    .hero h2 { margin: 7px 0 4px; font-size: clamp(24px, 4vw, 36px); line-height: 1.12; letter-spacing: -.04em; }
+    .hero p { margin: 0; color: var(--muted); font-size: 13px; }
+    .date-chip { flex: 0 0 auto; text-align: right; }
+    .date-chip strong { display: block; font-size: 17px; }
+    .date-chip span { color: var(--muted); font-size: 11px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 20px; }
+    .stat { border: 1px solid var(--line); border-radius: 16px; background: rgba(18, 29, 46, .88); padding: 16px 17px; }
+    .stat-label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .stat-value { margin-top: 5px; font-size: 25px; letter-spacing: -.04em; font-weight: 850; }
+    .stat-note { color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .85fr); gap: 18px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: rgba(18, 29, 46, .92); box-shadow: var(--shadow); overflow: hidden; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 19px 20px 14px; }
+    .panel-head h3 { margin: 0; font-size: 16px; letter-spacing: -.02em; }
+    .panel-head p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .tag { border-radius: 999px; padding: 5px 9px; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+    .tag-mandatory { color: var(--teal); background: var(--teal-dim); }
+    .tag-optional { color: var(--amber); background: var(--amber-dim); }
+    .task-list { padding: 0 14px 15px; display: grid; gap: 11px; }
+    .task-card { padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, rgba(28, 43, 65, .85), rgba(20, 32, 50, .9)); }
+    .task-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .task-title { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .task-icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--teal-dim); color: var(--teal); font-size: 16px; flex: 0 0 auto; }
+    .task-card.optional .task-icon { background: var(--amber-dim); color: var(--amber); }
+    .task-title h4 { margin: 0; font-size: 13px; }
+    .task-title p { margin: 2px 0 0; font-size: 10px; color: var(--muted); }
+    .task-status { color: var(--muted); font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .task-status.done { color: var(--teal); }
+    .progress-track { width: 100%; height: 7px; margin: 14px 0 8px; background: rgba(5, 12, 22, .65); overflow: hidden; border-radius: 20px; }
+    .progress-fill { height: 100%; width: 0; border-radius: 20px; background: linear-gradient(90deg, #22bda7, #77e9d2); transition: width .25s ease; }
+    .task-card.optional .progress-fill { background: linear-gradient(90deg, #d89a3e, #f4cf82); }
+    .task-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .time-readout { color: #c9d6e5; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .task-actions { display: flex; gap: 7px; }
+    .task-actions .btn { padding: 7px 10px; font-size: 10px; }
+    .skill-picker { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .skill-picker label { color: var(--muted); font-size: 10px; font-weight: 750; }
+    select, input[type="time"] {
+      color: var(--text); background: #0d1726; border: 1px solid var(--line); border-radius: 9px; padding: 7px 9px; outline: none;
+    }
+    select { min-width: 155px; font-size: 11px; }
+    select:focus, input:focus { border-color: var(--teal); }
+    .notice { margin: 0 14px 15px; border-radius: 12px; padding: 11px 13px; background: rgba(131, 170, 255, .09); border: 1px solid rgba(131, 170, 255, .16); color: #c5d5f4; font-size: 11px; }
+    .notice strong { color: #e6efff; }
+    .side-stack { display: grid; gap: 18px; }
+    .cooldown-panel { padding: 18px 19px; }
+    .cooldown-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .cooldown-row h3 { margin: 0; font-size: 14px; }
+    .cooldown-time { font-size: 20px; font-weight: 850; font-variant-numeric: tabular-nums; color: var(--amber); }
+    .cooldown-panel p { color: var(--muted); font-size: 10px; margin: 7px 0 0; }
+    .cooldown-panel.ready .cooldown-time { color: var(--teal); }
+    .mission-wrap { padding: 0 18px 17px; }
+    .mission-list { display: grid; gap: 8px; }
+    .mission-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 11px; background: rgba(8, 16, 28, .24); }
+    .mission-name { font-size: 11px; font-weight: 750; }
+    .mission-meta { display: block; color: var(--muted); font-size: 9px; font-weight: 500; }
+    .mission-row .btn { padding: 6px 8px; font-size: 9px; flex: 0 0 auto; }
+    .empty-note { padding: 11px; color: var(--muted); border: 1px dashed var(--line); border-radius: 11px; font-size: 10px; text-align: center; }
+    .calendar-panel { margin-top: 18px; }
+    .calendar-legend { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 20px 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 9px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 3px; background: #31445b; }
+    .legend-dot.good { background: var(--teal); }
+    .legend-dot.partial { background: var(--amber); }
+    .legend-dot.missed { background: #8c5360; }
+    .month-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 0 15px 17px; }
+    .month { padding: 13px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8, 16, 28, .23); }
+    .month h4 { margin: 0 0 10px; font-size: 12px; }
+    .weekdays, .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .weekdays span { text-align: center; color: var(--muted); font-size: 8px; font-weight: 800; padding-bottom: 4px; }
+    .day { height: 25px; display: grid; place-items: center; border-radius: 7px; color: #bdcadd; font-size: 9px; background: rgba(48, 66, 88, .35); position: relative; }
+    .day.good { background: rgba(54, 214, 189, .22); color: #8df2df; outline: 1px solid rgba(54, 214, 189, .38); }
+    .day.partial { background: rgba(243, 185, 95, .18); color: #ffd78e; }
+    .day.missed { background: rgba(251, 119, 119, .12); color: #f69a9a; }
+    .day.today { outline: 1px solid #fff; outline-offset: 1px; }
+    .day.future, .day.outside { color: #53657c; background: rgba(35, 48, 66, .18); }
+    .schedule-panel { margin-top: 18px; }
+    .schedule-intro { padding: 0 20px 14px; color: var(--muted); font-size: 10px; }
+    .schedule-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 15px 17px; }
+    .day-card { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: rgba(8, 16, 28, .22); }
+    .day-card-head { padding: 9px 11px; background: rgba(28, 43, 65, .75); display: flex; justify-content: space-between; align-items: center; }
+    .day-card-head strong { font-size: 11px; }
+    .day-card-head span { font-size: 8px; color: var(--muted); }
+    .schedule-items { padding: 9px; display: grid; gap: 7px; }
+    .schedule-item { border-left: 2px solid var(--blue); padding: 5px 7px; background: rgba(131, 170, 255, .07); border-radius: 0 7px 7px 0; }
+    .schedule-item.study { border-left-color: var(--teal); background: rgba(54, 214, 189, .06); }
+    .schedule-item.skill { border-left-color: var(--amber); background: rgba(243, 185, 95, .06); }
+    .schedule-item strong { display: block; font-size: 9px; }
+    .schedule-item small { display: block; color: var(--muted); font-size: 8px; margin-top: 1px; }
+    .schedule-edit { margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .schedule-edit input { width: 82px; font-size: 9px; padding: 4px 5px; }
+    .schedule-edit span { color: var(--muted); font-size: 8px; }
+    .schedule-empty { color: var(--muted); font-size: 9px; padding: 5px; }
+    .footer-note { color: #74869d; text-align: center; font-size: 10px; margin: 18px 0 0; line-height: 1.7; }
+    #storageStatus { color: var(--teal); font-weight: 800; }
+    #storageStatus.error { color: var(--red); }
+    .top-actions { justify-content: flex-end; }
+    @media (max-width: 980px) { .topbar { align-items: flex-start; flex-wrap: wrap; } }
+    @media (max-width: 620px) { .top-actions { justify-content: flex-start; } }
+    .toast { position: fixed; bottom: 18px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 20; background: #e7fff9; color: #0c2824; border-radius: 10px; padding: 10px 14px; box-shadow: var(--shadow); font-size: 11px; font-weight: 800; transition: .22s ease; max-width: calc(100% - 24px); text-align: center; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .alarm-banner {
+      position: fixed; top: 16px; left: 50%; transform: translate(-50%, -18px); opacity: 0;
+      pointer-events: none; z-index: 40; width: min(520px, calc(100% - 24px));
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 14px; border: 1px solid rgba(54, 214, 189, .4); border-radius: 14px;
+      background: #102b2a; color: #dffff8; box-shadow: 0 18px 50px rgba(0,0,0,.4);
+      font-size: 12px; font-weight: 800; transition: .2s ease;
+    }
+    .alarm-banner.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    .task-actions .btn-reset { color: #ffaaaa; border-color: rgba(251, 119, 119, .28); background: var(--red-dim); }
+    .task-actions .btn-reset:disabled { opacity: .25; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(2, 7, 15, .76); display: none; place-items: center; padding: 18px; }
+    .modal-backdrop.show { display: grid; }
+    .modal { width: min(410px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 17px; padding: 20px; box-shadow: var(--shadow); }
+    .modal h3 { margin: 0 0 7px; font-size: 16px; }
+    .modal p { color: var(--muted); font-size: 11px; margin: 0 0 16px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      .side-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mission-panel { grid-column: span 2; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 20px, 540px); padding-top: 16px; }
+      .topbar { align-items: flex-start; }
+      .brand h1 { font-size: 14px; }
+      .top-actions { justify-content: flex-end; }
+      .top-actions .btn { padding: 7px 8px; font-size: 10px; }
+      .hero { align-items: flex-start; flex-direction: column; padding: 20px; }
+      .date-chip { text-align: left; }
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+      .stat { padding: 12px; }
+      .stat-value { font-size: 21px; }
+      .side-stack { grid-template-columns: 1fr; }
+      .mission-panel { grid-column: auto; }
+      .month-grid, .schedule-grid { grid-template-columns: 1fr; }
+      .panel-head { padding: 16px 15px 12px; }
+      .task-list { padding: 0 9px 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">F</div>
+        <div>
+          <h1>FOCUS SPRINT</h1>
+          <p>116-DAY STUDY SYSTEM · PC EDITION · NOV 2026 — FEB 2027</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-quiet" id="soundBtn" type="button">Test alarm sound</button>
+        <button class="btn btn-quiet" id="exportBtn" type="button">Export backup</button>
+        <button class="btn btn-quiet" id="importBtn" type="button">Import backup</button>
+        <input id="importFile" type="file" accept=".json,application/json" hidden>
+        <button class="btn btn-danger" id="resetBtn" type="button">Reset today</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Small progress. Every single day.</div>
+        <h2>Build skills. Protect your streak.</h2>
+        <p>AI / ML + Academic are your two daily commitments. One optional skill keeps your learning moving.</p>
+      </div>
+      <div class="date-chip">
+        <strong id="todayDate">Loading date…</strong>
+        <span id="programStatus">Your four-month sprint</span>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Study statistics">
+      <div class="stat"><div class="stat-label">CURRENT STREAK</div><div class="stat-value" id="currentStreak">0 <span style="font-size:12px;color:var(--muted)">days</span></div><div class="stat-note" id="streakNote">Complete both core tasks today</div></div>
+      <div class="stat"><div class="stat-label">BEST STREAK</div><div class="stat-value" id="bestStreak">0 <span style="font-size:12px;color:var(--muted)">days</span></div><div class="stat-note">Your longest run</div></div>
+      <div class="stat"><div class="stat-label">STREAK DAYS DONE</div><div class="stat-value" id="completedDays">0</div><div class="stat-note">AI / ML + Academic completed</div></div>
+      <div class="stat"><div class="stat-label">DAYS LEFT</div><div class="stat-value" id="daysLeft">116</div><div class="stat-note">Until 28 February 2027</div></div>
+    </section>
+
+    <main>
+      <div class="layout">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3>Today's tasks</h3><p id="dailySubtitle">Track your focused study time.</p></div>
+            <span class="tag tag-mandatory">2 required</span>
+          </div>
+          <div class="task-list" id="taskList"></div>
+          <div class="notice"><strong>Streak rule:</strong> complete the full 3-hour AI / ML target and 1-hour Academic target. The optional skill target is 2 hours. The optional skill session does not block your streak. When a timer reaches its target, it stops and sounds an alarm. After marking a task complete, the next task can be marked complete only after 1 hour. Pause the timer during breaks.</div>
+        </section>
+
+        <aside class="side-stack">
+          <section class="panel cooldown-panel" id="cooldownPanel">
+            <div class="cooldown-row"><h3>Next completion unlocks in</h3><div class="cooldown-time" id="cooldownClock">Ready</div></div>
+            <p id="cooldownText">You can mark a task complete when its study-time target is reached.</p>
+          </section>
+          <section class="panel mission-panel">
+            <div class="panel-head"><div><h3>Skill missions</h3><p>Finish learning a skill to remove it from your daily options.</p></div><span class="tag tag-optional">Optional</span></div>
+            <div class="mission-wrap"><div class="mission-list" id="missionList"></div></div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="panel calendar-panel">
+        <div class="panel-head"><div><h3>Streak calendar</h3><p>Four-month overview · a teal day means both required tasks were completed.</p></div><span class="tag tag-mandatory">Nov – Feb</span></div>
+        <div class="calendar-legend">
+          <span class="legend-item"><i class="legend-dot good"></i> Streak day</span>
+          <span class="legend-item"><i class="legend-dot partial"></i> One core task done</span>
+          <span class="legend-item"><i class="legend-dot missed"></i> Missed day</span>
+          <span class="legend-item"><i class="legend-dot"></i> Future / not started</span>
+        </div>
+        <div class="month-grid" id="monthGrid"></div>
+      </section>
+
+      <section class="panel schedule-panel">
+        <div class="panel-head"><div><h3>Weekly class & study routine</h3><p>Classes are copied from your timetable. Suggested study blocks can be edited.</p></div><span class="tag tag-mandatory">Weekly</span></div>
+        <div class="schedule-intro">The study hours are a starter plan, not fixed commitments. Adjust them around travel, meals, prayer, sleep and personal responsibilities. Your daily task targets remain 3h AI / ML + 1h Academic.</div>
+        <div class="schedule-grid" id="scheduleGrid"></div>
+      </section>
+    </main>
+    <p class="footer-note">Your progress is saved locally in this browser on this PC. <strong id="storageStatus">Checking local save…</strong><br>Export a backup before clearing browser data, changing browsers or changing devices. Keep this tab open and the PC awake for the most reliable alarm.</p>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="alarm-banner" id="alarmBanner" role="alert" aria-live="assertive">
+    <span id="alarmText">Study timer finished.</span>
+    <button class="btn btn-primary" id="stopAlarmBtn" type="button">Stop alarm</button>
+  </div>
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal"><h3 id="modalTitle">Confirm action</h3><p id="modalText">Are you sure?</p><div class="modal-actions"><button class="btn btn-quiet" id="modalCancel" type="button">Cancel</button><button class="btn btn-primary" id="modalConfirm" type="button">Confirm</button></div></div>
+  </div>
+
+  <script>
+    'use strict';
+    const PROGRAM_START = '2026-11-05';
+    const PROGRAM_END = '2027-02-28';
+    const STORAGE_KEY = 'focusSprintStudyPlanner_v1';
+    const COOLDOWN_MS = 60 * 60 * 1000;
+    const TASKS = {
+      ai: { title: 'AI / ML Deep Work', subtitle: 'Daily mandatory learning', targetMin: 180, icon: '✦', required: true },
+      academic: { title: 'Academic Study', subtitle: 'Class topics, revision or assignments', targetMin: 60, icon: '▤', required: true },
+      skill: { title: 'One Skill Session', subtitle: 'Choose one active skill mission', targetMin: 120, icon: '⌘', required: false }
+    };
+    const SKILLS = [
+      { id: 'java', name: 'Java' },
+      { id: 'springboot', name: 'Spring Boot' },
+      { id: 'html', name: 'HTML' },
+      { id: 'css', name: 'CSS' },
+      { id: 'javascript', name: 'JavaScript' },
+      { id: 'react', name: 'React' },
+      { id: 'figma', name: 'Figma' }
+    ];
+    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const CLASS_EVENTS = {
+      Sun: [
+        { start: '08:30', end: '09:50', title: 'System Analysis and Design', detail: 'CSE 3411 · Section H · Room 328' },
+        { start: '11:11', end: '13:40', title: 'Advanced Object Oriented Programming Lab', detail: 'CSE 2118 · Section H · Room 423' },
+        { start: '15:11', end: '16:30', title: 'Computer Architecture', detail: 'CSE 3313 · Section L · Room 324' }
+      ],
+      Mon: [
+        { start: '14:00', end: '16:30', title: 'Introduction to Computer Systems', detail: 'CSE 1110 · Section P · Room 326' }
+      ],
+      Tue: [],
+      Wed: [
+        { start: '08:30', end: '09:50', title: 'System Analysis and Design', detail: 'CSE 3411 · Section H · Room 328' },
+        { start: '11:11', end: '13:40', title: 'Web Programming', detail: 'CSE 4165 · Section P · Room 926' },
+        { start: '15:11', end: '16:30', title: 'Computer Architecture', detail: 'CSE 3313 · Section L · Room 324' }
+      ],
+      Thu: [],
+      Fri: [],
+      Sat: [
+        { start: '14:00', end: '16:30', title: 'System Analysis and Design Laboratory', detail: 'CSE 3412 · Section D · Room 427' }
+      ]
+    };
+    const DEFAULT_STUDY_BLOCKS = {
+      Sun: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '16:45', end: '19:45', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '20:00', end: '21:00', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '21:15', end: '23:15', kind: 'skill' }
+      ],
+      Mon: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '07:00', end: '10:00', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '10:30', end: '11:30', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '19:00', end: '21:00', kind: 'skill' }
+      ],
+      Tue: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '08:00', end: '11:00', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '11:30', end: '12:30', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '16:00', end: '18:00', kind: 'skill' }
+      ],
+      Wed: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '16:45', end: '19:45', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '20:00', end: '21:00', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '21:15', end: '23:15', kind: 'skill' }
+      ],
+      Thu: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '08:00', end: '11:00', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '11:30', end: '12:30', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '16:00', end: '18:00', kind: 'skill' }
+      ],
+      Fri: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '08:00', end: '11:00', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '11:30', end: '12:30', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '16:00', end: '18:00', kind: 'skill' }
+      ],
+      Sat: [
+        { id: 'ai', label: 'AI / ML · 3 hours', start: '07:00', end: '10:00', kind: 'study' },
+        { id: 'academic', label: 'Academic · 1 hour', start: '10:30', end: '11:30', kind: 'study' },
+        { id: 'skill', label: 'Optional skill · 2 hours', start: '19:00', end: '21:00', kind: 'skill' }
+      ]
+    };
+
+    let storageFailed = false;
+    let storageWarning = '';
+    function setStorageStatus(message, isError = false) {
+      const el = document.getElementById('storageStatus');
+      if (!el) return;
+      el.textContent = message;
+      el.classList.toggle('error', Boolean(isError));
+    }
+    function clone(value) { return JSON.parse(JSON.stringify(value)); }
+    function defaultState() {
+      return {
+        days: {}, running: null, lastCompletedAt: null,
+        completedSkills: [], studyBlocks: clone(DEFAULT_STUDY_BLOCKS)
+      };
+    }
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        const fresh = defaultState();
+        const savedBlocks = parsed && parsed.studyBlocks && typeof parsed.studyBlocks === 'object' ? parsed.studyBlocks : fresh.studyBlocks;
+        // Upgrade a day only when all its saved blocks still match the old built-in defaults.
+        // User-edited schedule times are deliberately preserved.
+        const previousDefaults = {
+          Sun: { ai: ['17:30', '20:30'], academic: ['21:00', '22:00'], skill: ['22:15', '23:15'] },
+          Mon: { ai: ['07:00', '10:00'], academic: ['10:30', '11:30'], skill: ['19:00', '20:00'] },
+          Tue: { ai: ['08:00', '11:00'], academic: ['11:30', '12:30'], skill: ['16:00', '17:00'] },
+          Wed: { ai: ['17:30', '20:30'], academic: ['21:00', '22:00'], skill: ['22:15', '23:15'] },
+          Thu: { ai: ['08:00', '11:00'], academic: ['11:30', '12:30'], skill: ['16:00', '17:00'] },
+          Fri: { ai: ['08:00', '11:00'], academic: ['11:30', '12:30'], skill: ['16:00', '17:00'] },
+          Sat: { ai: ['07:00', '10:00'], academic: ['10:30', '11:30'], skill: ['19:00', '20:00'] }
+        };
+        for (const day of DAYS) {
+          const savedDay = Array.isArray(savedBlocks[day]) ? savedBlocks[day] : null;
+          if (!savedDay) continue;
+          const old = previousDefaults[day];
+          const matchesOldDefault = ['ai', 'academic', 'skill'].every(id => {
+            const block = savedDay.find(item => item.id === id);
+            return block && block.start === old[id][0] && block.end === old[id][1];
+          });
+          if (matchesOldDefault) {
+            savedBlocks[day] = clone(fresh.studyBlocks[day]);
+          } else {
+            const skillBlock = savedDay.find(item => item.id === 'skill');
+            if (skillBlock && skillBlock.label === 'Optional skill') skillBlock.label = 'Optional skill · 2 hours';
+          }
+        }
+        return {
+          days: parsed && parsed.days && typeof parsed.days === 'object' ? parsed.days : {},
+          running: parsed && parsed.running && typeof parsed.running === 'object' ? parsed.running : null,
+          lastCompletedAt: parsed && Number.isFinite(parsed.lastCompletedAt) ? parsed.lastCompletedAt : null,
+          completedSkills: parsed && Array.isArray(parsed.completedSkills) ? parsed.completedSkills.filter(id => SKILLS.some(s => s.id === id)) : [],
+          studyBlocks: savedBlocks
+        };
+      } catch (error) {
+        storageFailed = true;
+        storageWarning = 'Local browser storage could not be read. This session may not save progress; export backups regularly.';
+        console.warn('Saved planner data could not be read; starting with a fresh planner.', error);
+        return defaultState();
+      }
+    }
+    let state = loadState();
+    let toastTimer = null;
+    let modalResolver = null;
+    let audioContext = null;
+    let alarmInterval = null;
+    let alarmStopTimer = null;
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        storageFailed = false;
+        setStorageStatus('Local save: working on this PC', false);
+        return true;
+      } catch (error) {
+        const firstFailure = !storageFailed;
+        storageFailed = true;
+        setStorageStatus('Local save unavailable — export a backup', true);
+        if (firstFailure && typeof showToast === 'function') {
+          showToast('Browser storage is unavailable. Export a backup to protect your progress.');
+        }
+        console.warn('Could not save planner data.', error);
+        return false;
+      }
+    }
+    function localDateKey(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    function dateFromKey(key) {
+      const [y, m, d] = key.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    function addDays(date, amount) {
+      const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      next.setDate(next.getDate() + amount);
+      return next;
+    }
+    function dayDiff(fromKey, toKey) {
+      return Math.round((dateFromKey(toKey) - dateFromKey(fromKey)) / 86400000);
+    }
+    function inProgram(key = localDateKey()) { return key >= PROGRAM_START && key <= PROGRAM_END; }
+    function getDayRecord(key = localDateKey()) {
+      if (!state.days[key] || typeof state.days[key] !== 'object') state.days[key] = {};
+      const record = state.days[key];
+      ['ai', 'academic', 'skill'].forEach(id => {
+        if (!record[id] || typeof record[id] !== 'object') record[id] = { elapsedMs: 0, completeAt: null };
+        if (!Number.isFinite(record[id].elapsedMs) || record[id].elapsedMs < 0) record[id].elapsedMs = 0;
+        if (!Number.isFinite(record[id].completeAt)) record[id].completeAt = null;
+      });
+      if (typeof record.selectedSkill !== 'string' || !SKILLS.some(s => s.id === record.selectedSkill) || state.completedSkills.includes(record.selectedSkill)) {
+        const active = activeSkills();
+        const offset = Math.max(0, dayDiff(PROGRAM_START, key));
+        record.selectedSkill = active.length ? active[offset % active.length].id : null;
+      }
+      return record;
+    }
+    function activeSkills() { return SKILLS.filter(skill => !state.completedSkills.includes(skill.id)); }
+    function taskRecord(taskId, key = localDateKey()) {
+      const day = getDayRecord(key);
+      return day[taskId];
+    }
+    function flushRunningTimer(now = Date.now()) {
+      if (!state.running) return;
+      const running = state.running;
+      const midnightAfterStartDay = addDays(dateFromKey(running.date), 1).getTime();
+      const endAt = Math.min(now, midnightAfterStartDay);
+      const elapsed = Math.max(0, endAt - running.startedAt);
+      const rec = taskRecord(running.taskId, running.date);
+      if (rec && !rec.completeAt) rec.elapsedMs += elapsed;
+      state.running = null;
+      saveState();
+    }
+    function ensureAudioContext() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        if (!audioContext) audioContext = new AudioContextClass();
+        if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+        return audioContext;
+      } catch (error) {
+        console.warn('Audio alarm is unavailable in this browser.', error);
+        return null;
+      }
+    }
+    function testAlarmSound() {
+      const context = ensureAudioContext();
+      if (!context) { showToast('This browser does not support an audio alarm.'); return; }
+      const ready = context.state === 'suspended' ? context.resume() : Promise.resolve();
+      ready.then(() => { playAlarmBeep(); showToast('Alarm sound test played. Keep browser sound enabled.'); })
+        .catch(() => showToast('Browser blocked alarm audio. Check site sound settings.'));
+    }
+    function playAlarmBeep() {
+      const context = ensureAudioContext();
+      if (!context || context.state !== 'running') return;
+      try {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, context.currentTime);
+        oscillator.frequency.setValueAtTime(660, context.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.0001, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.42);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.44);
+      } catch (error) { console.warn('Could not play alarm sound.', error); }
+    }
+    function stopAlarm() {
+      if (alarmInterval) clearInterval(alarmInterval);
+      if (alarmStopTimer) clearTimeout(alarmStopTimer);
+      alarmInterval = null;
+      alarmStopTimer = null;
+      document.getElementById('alarmBanner').classList.remove('show');
+    }
+    function triggerAlarm(taskId) {
+      const title = TASKS[taskId] ? TASKS[taskId].title : 'Study task';
+      document.getElementById('alarmText').textContent = `${title} target reached — take a break or mark the task complete.`;
+      document.getElementById('alarmBanner').classList.add('show');
+      stopAlarmTimersOnly();
+      playAlarmBeep();
+      alarmInterval = setInterval(playAlarmBeep, 850);
+      alarmStopTimer = setTimeout(stopAlarm, 15000);
+    }
+    function stopAlarmTimersOnly() {
+      if (alarmInterval) clearInterval(alarmInterval);
+      if (alarmStopTimer) clearTimeout(alarmStopTimer);
+      alarmInterval = null;
+      alarmStopTimer = null;
+    }
+    function checkRunningTimerCompletion(now = Date.now()) {
+      if (!state.running) return false;
+      const running = state.running;
+      if (running.date !== localDateKey()) return false;
+      const config = TASKS[running.taskId];
+      if (!config) { state.running = null; saveState(); return false; }
+      const rec = taskRecord(running.taskId, running.date);
+      const midnight = addDays(dateFromKey(running.date), 1).getTime();
+      const total = rec.elapsedMs + Math.max(0, Math.min(now, midnight) - running.startedAt);
+      const targetMs = config.targetMin * 60000;
+      if (total < targetMs) return false;
+      rec.elapsedMs = targetMs;
+      state.running = null;
+      saveState();
+      triggerAlarm(running.taskId);
+      showToast(`${config.title} timer finished. Alarm is ringing.`);
+      render();
+      return true;
+    }
+    function latestCompletionTimestamp() {
+      let latest = null;
+      Object.values(state.days).forEach(day => {
+        if (!day || typeof day !== 'object') return;
+        ['ai', 'academic', 'skill'].forEach(id => {
+          const value = day[id] && day[id].completeAt;
+          if (Number.isFinite(value) && (latest === null || value > latest)) latest = value;
+        });
+      });
+      return latest;
+    }
+    function resetTaskToday(taskId) {
+      const key = localDateKey();
+      if (!TASKS[taskId]) return;
+      const day = getDayRecord(key);
+      const rec = day[taskId];
+      const oldCompleteAt = rec.completeAt;
+      stopAlarm();
+      if (state.running && state.running.date === key && state.running.taskId === taskId) state.running = null;
+      rec.elapsedMs = 0;
+      rec.completeAt = null;
+      if (oldCompleteAt && state.lastCompletedAt === oldCompleteAt) state.lastCompletedAt = latestCompletionTimestamp();
+      saveState();
+      render();
+      showToast(`${TASKS[taskId].title}: today's progress reset. Previous days are safe.`);
+    }
+    async function resetToday() {
+      const ok = await askConfirm('Reset today only?', 'This clears today’s AI/ML, Academic and Skill timers/completions only. All previous-day streaks, history, completed missions and saved study blocks will stay untouched.', 'Reset today');
+      if (!ok) return;
+      const key = localDateKey();
+      const day = getDayRecord(key);
+      if (state.running && state.running.date === key) state.running = null;
+      ['ai', 'academic', 'skill'].forEach(id => { day[id].elapsedMs = 0; day[id].completeAt = null; });
+      state.lastCompletedAt = latestCompletionTimestamp();
+      stopAlarm();
+      saveState();
+      render();
+      showToast('Today reset. Previous days and streak history are preserved.');
+    }
+    function getElapsed(taskId, key = localDateKey()) {
+      const rec = taskRecord(taskId, key);
+      let elapsed = rec.elapsedMs;
+      if (state.running && state.running.date === key && state.running.taskId === taskId) {
+        const midnight = addDays(dateFromKey(key), 1).getTime();
+        elapsed += Math.max(0, Math.min(Date.now(), midnight) - state.running.startedAt);
+      }
+      return elapsed;
+    }
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours > 0) return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+      return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+    }
+    function formatClock(ms) {
+      const total = Math.max(0, Math.ceil(ms / 1000));
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      return [h, m, s].map(n => String(n).padStart(2, '0')).join(':');
+    }
+    function cooldownRemaining() {
+      if (!state.lastCompletedAt) return 0;
+      return Math.max(0, state.lastCompletedAt + COOLDOWN_MS - Date.now());
+    }
+    function taskDone(taskId, key = localDateKey()) {
+      const rec = taskRecord(taskId, key);
+      return Boolean(rec && rec.completeAt);
+    }
+    function streakDay(key) { return taskDone('ai', key) && taskDone('academic', key); }
+    function calculateStats() {
+      const today = localDateKey();
+      let completed = 0, best = 0, running = 0;
+      let cursor = dateFromKey(PROGRAM_START);
+      const end = dateFromKey(PROGRAM_END);
+      while (cursor <= end) {
+        const key = localDateKey(cursor);
+        if (streakDay(key)) { completed++; running++; best = Math.max(best, running); }
+        else running = 0;
+        cursor = addDays(cursor, 1);
+      }
+      let current = 0;
+      let checkKey = today;
+      if (today < PROGRAM_START) checkKey = PROGRAM_START;
+      if (today > PROGRAM_END) checkKey = PROGRAM_END;
+      if (!streakDay(checkKey) && checkKey === today) checkKey = localDateKey(addDays(dateFromKey(today), -1));
+      if (checkKey > PROGRAM_END) checkKey = PROGRAM_END;
+      while (checkKey >= PROGRAM_START && streakDay(checkKey)) {
+        current++;
+        checkKey = localDateKey(addDays(dateFromKey(checkKey), -1));
+      }
+      const daysLeft = today > PROGRAM_END ? 0 : Math.max(0, dayDiff(today, PROGRAM_END) + 1);
+      return { completed, best, current, daysLeft };
+    }
+    function showToast(message) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+    function askConfirm(title, text, confirmLabel = 'Confirm') {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalText').textContent = text;
+      document.getElementById('modalConfirm').textContent = confirmLabel;
+      document.getElementById('modalBackdrop').classList.add('show');
+      return new Promise(resolve => { modalResolver = resolve; });
+    }
+    function closeModal(result) {
+      document.getElementById('modalBackdrop').classList.remove('show');
+      if (modalResolver) { modalResolver(result); modalResolver = null; }
+    }
+    function startOrPauseTimer(taskId) {
+      ensureAudioContext();
+      if (!inProgram()) { showToast('The four-month sprint is not active today.'); return; }
+      const key = localDateKey();
+      const rec = taskRecord(taskId, key);
+      if (rec.completeAt) return;
+      if (state.running && state.running.date === key && state.running.taskId === taskId) {
+        if (checkRunningTimerCompletion()) return;
+        flushRunningTimer();
+        render();
+        showToast('Study timer paused.');
+      } else {
+        if (state.running && checkRunningTimerCompletion()) return;
+        if (state.running) {
+          flushRunningTimer();
+          showToast('Previous timer paused; the new timer has started.');
+        }
+        state.running = { date: key, taskId, startedAt: Date.now() };
+        saveState();
+        render();
+      }
+    }
+    function completeTask(taskId) {
+      const key = localDateKey();
+      const config = TASKS[taskId];
+      const rec = taskRecord(taskId, key);
+      if (!config || rec.completeAt) return;
+      if (state.running && state.running.date === key && state.running.taskId === taskId && checkRunningTimerCompletion()) return;
+      if (cooldownRemaining() > 0) { showToast('One-hour cooldown is still active.'); return; }
+      const elapsed = getElapsed(taskId, key);
+      if (elapsed < config.targetMin * 60000) { showToast(`Complete ${config.targetMin / 60} hour(s) of study time first.`); return; }
+      if (state.running && state.running.date === key && state.running.taskId === taskId) flushRunningTimer();
+      rec.completeAt = Date.now();
+      state.lastCompletedAt = rec.completeAt;
+      saveState();
+      showToast(taskId === 'ai' || taskId === 'academic' ? 'Task completed. Your next completion unlocks in 1 hour.' : 'Optional skill session completed. Cooldown started.');
+      render();
+    }
+    function selectSkill(skillId) {
+      const key = localDateKey();
+      const day = getDayRecord(key);
+      if (day.skill.completeAt) { showToast('Today’s skill session is already completed.'); return; }
+      if (state.running && state.running.date === key && state.running.taskId === 'skill') { showToast('Pause the skill timer before changing the skill.'); render(); return; }
+      if (!activeSkills().some(s => s.id === skillId)) return;
+      if (day.selectedSkill !== skillId && day.skill.elapsedMs > 0) {
+        askConfirm('Change today’s skill?', 'Changing the skill will reset the current optional skill timer for today.', 'Change skill').then(ok => {
+          if (!ok) { render(); return; }
+          day.selectedSkill = skillId;
+          day.skill.elapsedMs = 0;
+          day.skill.completeAt = null;
+          saveState(); render();
+        });
+      } else {
+        day.selectedSkill = skillId;
+        saveState(); render();
+      }
+    }
+    async function completeMission(skillId) {
+      const skill = SKILLS.find(s => s.id === skillId);
+      if (!skill || state.completedSkills.includes(skillId)) return;
+      const ok = await askConfirm('Mark mission complete?', `${skill.name} will be removed from your active daily skill options. This does not affect your daily streak.`, 'Mission complete');
+      if (!ok) return;
+      const today = getDayRecord();
+      const isSelectedToday = today.selectedSkill === skillId;
+      if (isSelectedToday && state.running && state.running.date === localDateKey() && state.running.taskId === 'skill') {
+        flushRunningTimer();
+      }
+      if (isSelectedToday) {
+        const nextSkill = activeSkills().find(item => item.id !== skillId);
+        today.selectedSkill = nextSkill ? nextSkill.id : null;
+        today.skill.elapsedMs = 0;
+        today.skill.completeAt = null;
+      }
+      state.completedSkills.push(skillId);
+      saveState();
+      showToast(`${skill.name} mission completed and removed from active options.`);
+      render();
+    }
+    function renderTasks() {
+      const key = localDateKey();
+      const day = getDayRecord(key);
+      const inRange = inProgram(key);
+      document.getElementById('dailySubtitle').textContent = inRange ? `Today · ${dateFromKey(key).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })} · Timers save automatically.` : 'This date is outside your four-month sprint.';
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+      ['ai', 'academic', 'skill'].forEach(taskId => {
+        if (taskId === 'skill' && !activeSkills().length) return;
+        const config = TASKS[taskId];
+        const rec = day[taskId];
+        const elapsed = getElapsed(taskId, key);
+        const percent = Math.min(100, (elapsed / (config.targetMin * 60000)) * 100);
+        const done = Boolean(rec.completeAt);
+        const running = Boolean(state.running && state.running.date === key && state.running.taskId === taskId);
+        const cooling = cooldownRemaining() > 0;
+        const skill = taskId === 'skill' ? SKILLS.find(s => s.id === day.selectedSkill) : null;
+        const card = document.createElement('article');
+        card.className = `task-card ${taskId === 'skill' ? 'optional' : ''}`;
+        const topicLabel = skill ? `Today’s topic: ${skill.name}` : config.subtitle;
+        card.innerHTML = `
+          <div class="task-top">
+            <div class="task-title"><div class="task-icon">${config.icon}</div><div><h4>${config.title}</h4><p>${escapeHTML(topicLabel)}</p></div></div>
+            <div class="task-status ${done ? 'done' : ''}">${done ? '✓ COMPLETED' : (running ? '● TIMER RUNNING' : (config.required ? 'REQUIRED' : 'OPTIONAL'))}</div>
+          </div>
+          ${taskId === 'skill' ? `<div class="skill-picker"><label for="skillSelect">Choose one:</label><select id="skillSelect" ${done || running || !inRange ? 'disabled' : ''}>${activeSkills().map(s => `<option value="${s.id}" ${s.id === day.selectedSkill ? 'selected' : ''}>${escapeHTML(s.name)}</option>`).join('')}</select></div>` : ''}
+          <div class="progress-track"><div class="progress-fill" style="width:${percent.toFixed(1)}%"></div></div>
+          <div class="task-bottom">
+            <div class="time-readout">${formatTime(elapsed)} / ${config.targetMin / 60}h target</div>
+            <div class="task-actions">
+              <button class="btn" type="button" data-action="timer" data-task="${taskId}" ${done || !inRange ? 'disabled' : ''}>${running ? 'Pause' : 'Start timer'}</button>
+              <button class="btn btn-primary" type="button" data-action="complete" data-task="${taskId}" ${done || !inRange || cooling || elapsed < config.targetMin * 60000 ? 'disabled' : ''}>Mark complete</button>
+              <button class="btn btn-reset" type="button" data-action="reset" data-task="${taskId}" ${(!elapsed && !done && !running) ? 'disabled' : ''}>Reset task</button>
+            </div>
+          </div>`;
+        list.appendChild(card);
+      });
+      const select = document.getElementById('skillSelect');
+      if (select) select.addEventListener('change', event => selectSkill(event.target.value));
+      list.querySelectorAll('[data-action="timer"]').forEach(button => button.addEventListener('click', () => startOrPauseTimer(button.dataset.task)));
+      list.querySelectorAll('[data-action="complete"]').forEach(button => button.addEventListener('click', () => completeTask(button.dataset.task)));
+      list.querySelectorAll('[data-action="reset"]').forEach(button => button.addEventListener('click', async () => {
+        const id = button.dataset.task;
+        const ok = await askConfirm('Reset this task today?', `Only today’s ${TASKS[id].title} timer and completion will be cleared. Other tasks and all previous days will stay safe.`, 'Reset task');
+        if (ok) resetTaskToday(id);
+      }));
+    }
+    function renderCooldown() {
+      const remaining = cooldownRemaining();
+      const panel = document.getElementById('cooldownPanel');
+      const clock = document.getElementById('cooldownClock');
+      const text = document.getElementById('cooldownText');
+      panel.classList.toggle('ready', remaining <= 0);
+      clock.textContent = remaining > 0 ? formatClock(remaining) : 'Ready';
+      text.textContent = remaining > 0 ? 'A task was just completed. You can mark another task complete when this timer reaches zero.' : 'You can mark a task complete when its study-time target is reached.';
+    }
+    function renderMissions() {
+      const root = document.getElementById('missionList');
+      const active = activeSkills();
+      root.innerHTML = '';
+      if (!active.length) {
+        root.innerHTML = '<div class="empty-note">All listed skill missions are complete. Your optional skill task is now hidden.</div>';
+        return;
+      }
+      active.forEach(skill => {
+        const row = document.createElement('div');
+        row.className = 'mission-row';
+        row.innerHTML = `<div><span class="mission-name">${escapeHTML(skill.name)}</span><span class="mission-meta">Active learning mission</span></div><button class="btn" type="button" data-mission="${skill.id}">Mission complete</button>`;
+        root.appendChild(row);
+      });
+      root.querySelectorAll('[data-mission]').forEach(button => button.addEventListener('click', () => completeMission(button.dataset.mission)));
+    }
+    function renderStats() {
+      const stats = calculateStats();
+      document.getElementById('currentStreak').innerHTML = `${stats.current} <span style="font-size:12px;color:var(--muted)">days</span>`;
+      document.getElementById('bestStreak').innerHTML = `${stats.best} <span style="font-size:12px;color:var(--muted)">days</span>`;
+      document.getElementById('completedDays').textContent = stats.completed;
+      document.getElementById('daysLeft').textContent = stats.daysLeft;
+      const today = localDateKey();
+      const note = document.getElementById('streakNote');
+      if (!inProgram(today)) note.textContent = today < PROGRAM_START ? 'Sprint starts 5 November 2026' : 'Your four-month sprint has ended';
+      else if (streakDay(today)) note.textContent = 'Today’s streak is secured';
+      else note.textContent = 'Today is still in progress';
+      document.getElementById('todayDate').textContent = dateFromKey(today).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      let status = 'Your four-month sprint';
+      if (today < PROGRAM_START) status = 'Starts 5 November 2026';
+      else if (today > PROGRAM_END) status = 'Sprint completed';
+      else status = `${stats.daysLeft} days remaining · ends 28 Feb 2027`;
+      document.getElementById('programStatus').textContent = status;
+    }
+    function renderCalendar() {
+      const root = document.getElementById('monthGrid');
+      root.innerHTML = '';
+      const months = [{ year: 2026, month: 10 }, { year: 2026, month: 11 }, { year: 2027, month: 0 }, { year: 2027, month: 1 }];
+      const today = localDateKey();
+      const weekdayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+      months.forEach(({ year, month }) => {
+        const first = new Date(year, month, 1);
+        const count = new Date(year, month + 1, 0).getDate();
+        const box = document.createElement('div');
+        box.className = 'month';
+        const heading = document.createElement('h4');
+        heading.textContent = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+        box.appendChild(heading);
+        const weekdays = document.createElement('div');
+        weekdays.className = 'weekdays';
+        weekdayNames.forEach(name => { const s = document.createElement('span'); s.textContent = name; weekdays.appendChild(s); });
+        box.appendChild(weekdays);
+        const days = document.createElement('div');
+        days.className = 'days';
+        for (let i = 0; i < first.getDay(); i++) { const blank = document.createElement('span'); blank.className = 'day outside'; days.appendChild(blank); }
+        for (let d = 1; d <= count; d++) {
+          const date = new Date(year, month, d);
+          const key = localDateKey(date);
+          const cell = document.createElement('span');
+          cell.className = 'day';
+          cell.textContent = d;
+          if (key < PROGRAM_START) cell.classList.add('outside');
+          else if (key > today) cell.classList.add('future');
+          else {
+            const ai = taskDone('ai', key), academic = taskDone('academic', key);
+            if (ai && academic) cell.classList.add('good');
+            else if (ai || academic) cell.classList.add('partial');
+            else if (key < today) cell.classList.add('missed');
+          }
+          if (key === today) cell.classList.add('today');
+          cell.title = key < PROGRAM_START ? 'Before sprint start' : (key > today ? 'Future day' : (streakDay(key) ? 'Streak day: both core tasks done' : (taskDone('ai', key) || taskDone('academic', key) ? 'One core task completed' : 'No streak recorded')));
+          days.appendChild(cell);
+        }
+        box.appendChild(days);
+        root.appendChild(box);
+      });
+    }
+    function to12Hour(value) {
+      if (!value) return '';
+      const [h, m] = value.split(':').map(Number);
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      const hour = h % 12 || 12;
+      return `${hour}:${String(m).padStart(2, '0')} ${suffix}`;
+    }
+    function renderSchedule() {
+      const root = document.getElementById('scheduleGrid');
+      root.innerHTML = '';
+      DAYS.forEach(day => {
+        const card = document.createElement('div');
+        card.className = 'day-card';
+        const classes = CLASS_EVENTS[day] || [];
+        const blocks = Array.isArray(state.studyBlocks[day]) ? state.studyBlocks[day] : clone(DEFAULT_STUDY_BLOCKS[day]);
+        card.innerHTML = `<div class="day-card-head"><strong>${day === 'Sun' ? 'Sunday' : day === 'Mon' ? 'Monday' : day === 'Tue' ? 'Tuesday' : day === 'Wed' ? 'Wednesday' : day === 'Thu' ? 'Thursday' : day === 'Fri' ? 'Friday' : 'Saturday'}</strong><span>${classes.length ? `${classes.length} class${classes.length > 1 ? 'es' : ''}` : 'No class'}</span></div>`;
+        const items = document.createElement('div');
+        items.className = 'schedule-items';
+        classes.forEach(event => {
+          const el = document.createElement('div');
+          el.className = 'schedule-item';
+          el.innerHTML = `<strong>${escapeHTML(event.title)}</strong><small>${to12Hour(event.start)} – ${to12Hour(event.end)} · ${escapeHTML(event.detail)}</small>`;
+          items.appendChild(el);
+        });
+        blocks.forEach(block => {
+          const el = document.createElement('div');
+          el.className = `schedule-item ${block.kind === 'skill' ? 'skill' : 'study'}`;
+          el.innerHTML = `<strong>${escapeHTML(block.label)}</strong><small>Suggested study time</small><div class="schedule-edit"><input type="time" aria-label="${day} ${escapeHTML(block.label)} start time" value="${escapeHTML(block.start)}" data-day="${day}" data-block="${block.id}" data-field="start"><span>to</span><input type="time" aria-label="${day} ${escapeHTML(block.label)} end time" value="${escapeHTML(block.end)}" data-day="${day}" data-block="${block.id}" data-field="end"></div>`;
+          items.appendChild(el);
+        });
+        if (!classes.length && !blocks.length) { const empty = document.createElement('div'); empty.className = 'schedule-empty'; empty.textContent = 'No events planned.'; items.appendChild(empty); }
+        card.appendChild(items);
+        root.appendChild(card);
+      });
+      root.querySelectorAll('input[type="time"]').forEach(input => input.addEventListener('change', () => {
+        const { day, block, field } = input.dataset;
+        const target = (state.studyBlocks[day] || []).find(item => item.id === block);
+        if (!target) return;
+        target[field] = input.value;
+        saveState();
+        showToast(`${day} study time updated.`);
+      }));
+    }
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+    function render() {
+      const today = localDateKey();
+      if (state.running && state.running.date !== today) flushRunningTimer();
+      getDayRecord(today);
+      renderStats();
+      renderTasks();
+      renderCooldown();
+      renderMissions();
+      renderCalendar();
+      renderSchedule();
+      saveState();
+    }
+    function exportBackup() {
+      try {
+        const backup = { app: 'Focus Sprint Study Planner', version: 1, exportedAt: new Date().toISOString(), data: state };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `focus-sprint-backup-${localDateKey()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast('Backup file exported.');
+      } catch (error) { showToast('Backup export failed in this browser.'); }
+    }
+    function normalizeImportedState(input) {
+      if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Backup data is missing.');
+      const safe = defaultState();
+      if (input.days && typeof input.days === 'object' && !Array.isArray(input.days)) {
+        for (const [dateKey, rawDay] of Object.entries(input.days)) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey) || !rawDay || typeof rawDay !== 'object') continue;
+          const day = { selectedSkill: null };
+          for (const id of ['ai', 'academic', 'skill']) {
+            const raw = rawDay[id] && typeof rawDay[id] === 'object' ? rawDay[id] : {};
+            day[id] = {
+              elapsedMs: Number.isFinite(raw.elapsedMs) ? Math.max(0, Math.min(raw.elapsedMs, TASKS[id].targetMin * 60000)) : 0,
+              completeAt: Number.isFinite(raw.completeAt) && raw.completeAt > 0 ? raw.completeAt : null
+            };
+          }
+          if (typeof rawDay.selectedSkill === 'string' && SKILLS.some(item => item.id === rawDay.selectedSkill)) day.selectedSkill = rawDay.selectedSkill;
+          safe.days[dateKey] = day;
+        }
+      }
+      if (Array.isArray(input.completedSkills)) safe.completedSkills = [...new Set(input.completedSkills.filter(id => SKILLS.some(item => item.id === id)))];
+      if (input.studyBlocks && typeof input.studyBlocks === 'object') {
+        for (const dayName of DAYS) {
+          if (!Array.isArray(input.studyBlocks[dayName])) continue;
+          safe.studyBlocks[dayName] = input.studyBlocks[dayName].filter(block =>
+            block && typeof block === 'object' && ['ai', 'academic', 'skill'].includes(block.id) &&
+            typeof block.start === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(block.start) &&
+            typeof block.end === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(block.end)
+          ).map(block => ({
+            id: block.id,
+            label: typeof block.label === 'string' ? block.label.slice(0, 80) : `${block.id} study block`,
+            start: block.start,
+            end: block.end,
+            kind: block.id === 'skill' ? 'skill' : 'study'
+          }));
+        }
+      }
+      const running = input.running;
+      if (running && typeof running === 'object' && TASKS[running.taskId] && typeof running.date === 'string' &&
+          /^\d{4}-\d{2}-\d{2}$/.test(running.date) && Number.isFinite(running.startedAt)) {
+        safe.running = { taskId: running.taskId, date: running.date, startedAt: running.startedAt };
+      }
+      safe.lastCompletedAt = Number.isFinite(input.lastCompletedAt) && input.lastCompletedAt > 0 ? input.lastCompletedAt : null;
+      if (!safe.lastCompletedAt) {
+        for (const day of Object.values(safe.days)) {
+          for (const id of ['ai', 'academic', 'skill']) {
+            const stamp = day[id].completeAt;
+            if (Number.isFinite(stamp) && (!safe.lastCompletedAt || stamp > safe.lastCompletedAt)) safe.lastCompletedAt = stamp;
+          }
+        }
+      }
+      return safe;
+    }
+    async function importBackupFile(file) {
+      if (!file) return;
+      try {
+        const raw = await file.text();
+        const parsed = JSON.parse(raw);
+        if (!parsed || parsed.app !== 'Focus Sprint Study Planner' || !parsed.data) {
+          throw new Error('This file is not a Focus Sprint backup.');
+        }
+        const imported = normalizeImportedState(parsed.data);
+        const ok = await askConfirm('Import this backup?', 'This replaces the planner data currently saved in this browser with the selected backup. Export your current data first if you may need it.', 'Import backup');
+        if (!ok) return;
+        state = imported;
+        stopAlarm();
+        const saved = saveState();
+        render();
+        showToast(saved ? 'Backup imported successfully.' : 'Backup loaded for this session, but local save is unavailable.');
+      } catch (error) {
+        console.error('Backup import failed.', error);
+        showToast(error && error.message ? error.message : 'Could not import this backup file.');
+      } finally {
+        const input = document.getElementById('importFile');
+        if (input) input.value = '';
+      }
+    }
+    document.getElementById('soundBtn').addEventListener('click', testAlarmSound);
+    document.addEventListener('pointerdown', () => { ensureAudioContext(); }, { once: true });
+    document.getElementById('exportBtn').addEventListener('click', exportBackup);
+    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change', event => importBackupFile(event.target.files && event.target.files[0]));
+    document.getElementById('resetBtn').addEventListener('click', resetToday);
+    document.getElementById('stopAlarmBtn').addEventListener('click', stopAlarm);
+    document.getElementById('modalCancel').addEventListener('click', () => closeModal(false));
+    document.getElementById('modalConfirm').addEventListener('click', () => closeModal(true));
+    document.getElementById('modalBackdrop').addEventListener('click', event => { if (event.target.id === 'modalBackdrop') closeModal(false); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeModal(false); });
+
+    flushRunningTimerIfNeeded();
+    function flushRunningTimerIfNeeded() {
+      if (!state.running || state.running.date === localDateKey()) return;
+      const running = state.running;
+      const config = TASKS[running.taskId];
+      if (config) {
+        const midnight = addDays(dateFromKey(running.date), 1).getTime();
+        const rec = taskRecord(running.taskId, running.date);
+        const total = rec.elapsedMs + Math.max(0, midnight - running.startedAt);
+        if (total >= config.targetMin * 60000) {
+          rec.elapsedMs = config.targetMin * 60000;
+          state.running = null;
+          saveState();
+          triggerAlarm(running.taskId);
+          showToast(`${config.title} timer finished. Alarm is ringing.`);
+          return;
+        }
+      }
+      flushRunningTimer();
+    }
+    render();
+    if (storageWarning) setStorageStatus('Local save warning — export a backup', true);
+    else if (!storageFailed) setStorageStatus('Local save: working on this PC', false);
+    checkRunningTimerCompletion();
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) { checkRunningTimerCompletion(); renderTasks(); renderCooldown(); renderStats(); }
+    });
+    window.addEventListener('focus', () => { checkRunningTimerCompletion(); renderTasks(); renderCooldown(); renderStats(); });
+    setInterval(() => {
+      flushRunningTimerIfNeeded();
+      checkRunningTimerCompletion();
+      renderTasks();
+      renderCooldown();
+      renderStats();
+    }, 1000);
+  </script>
+</body>
+</html>
