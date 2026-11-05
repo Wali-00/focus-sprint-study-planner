@@ -1,0 +1,14 @@
+# Local launcher state
+.focus-sprint-port
+
+# Exported planner backups (may contain personal study history)
+focus-sprint-backup-*.json
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+desktop.ini
